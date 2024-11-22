@@ -47,33 +47,49 @@ if Constants.cantidad_grilla_vertical > 1:
 else:
     separacion_grilla_vertical = longitud_disponible_z  # Si solo hay una línea, ocupa todo el espacio disponible
 
-lineas_grilla_vertical = []
+cilindros_grilla = []
 
 for i in range(Constants.cantidad_grilla_vertical):
     z_pos = Constants.sangria_grilla + i * separacion_grilla_vertical
     if z_pos > Constants.Depth - Constants.sangria_grilla:
         break  # Evitar superar el límite superior
 
-    # Coordenadas fijas en X y Y
+    # Coordenadas fijas en X y Y (valores negativos en X)
     x_inferior = -Constants.GripperWidth
     y_inferior = 0
     x_superior = -Constants.WallThickness
     y_superior = Constants.GripperHeight + Constants.GripperHeightGift
 
-    # Crear los puntos para la línea vertical
-    punto_inferior = factory.addPoint(x_inferior, y_inferior, z_pos)
-    punto_superior = factory.addPoint(x_superior, y_superior, z_pos)
+    # Coordenadas del punto inicial y final
+    x0 = x_inferior
+    y0 = y_inferior
+    z0 = z_pos
 
-    # Crear la línea vertical
-    linea_vertical = factory.addLine(punto_inferior, punto_superior)
-    lineas_grilla_vertical.append(linea_vertical)
+    x1 = x_superior
+    y1 = y_superior
+    z1 = z_pos
+
+    # Vector dirección del cilindro
+    dx = x1 - x0
+    dy = y1 - y0
+    dz = z1 - z0
+
+    # Crear el cilindro
+    cilindro = factory.addCylinder(
+        x0, y0, z0,      # Origen del cilindro
+        dx, dy, dz,      # Vector dirección
+        Constants.radio_cilindro_grilla  # Radio del cilindro
+    )
+
+    # Almacenar el cilindro
+    cilindros_grilla.append((3, cilindro))
 
 # Sincronizar la geometría
 factory.synchronize()
 ############################### GRILLA ############################## 
 
 
-
+############################### BARRAS INTERNAS ############################## 
 BarPositions = np.linspace(0, InnerGripperHeight, Constants.NBars+2)
 for BarPosition in BarPositions[1:-1]:
     print(f"BarPosition:{BarPosition}")
@@ -100,21 +116,45 @@ for BarPosition in BarPositions[1:-1]:
         P6Bar = factory.addPoint(BarBottomLength-Constants.BarThinLength,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)  
         P7Bar = factory.addPoint(BarBottomLength,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)      
         PointTags += [P0Bar, P1Bar, P2Bar, P3Bar, P4Bar,P5Bar,P6Bar,P7Bar]
+############################### BARRAS INTERNAS ############################## 
 
-
+############################### LINEAS 2D Y SUP?############################## 
 LineTags = addLines(PointTags)
 WireTag = factory.addWire(LineTags)
 SurfaceDimTag = (2,factory.addPlaneSurface([WireTag]))
+############################### LINEAS 2D Y SUP? ############################## 
 
+############################### LE DA SUPERFICIE ############################## 
 ExtrudeOut = factory.extrude([SurfaceDimTag], 0, 0, Constants.Depth)
 HalfDimTag = ExtrudeOut[1]
+############################### LE DA SUPERFICIE ############################## 
+
+############################### DUPLICA LA FIGURA ############################## 
 CopyDimTags = factory.copy([HalfDimTag])
 factory.symmetrize(CopyDimTags, 1, 0, 0, 0)
+############################### DUPLICA LA FIGURA ############################## 
+
 factory.fuse(CopyDimTags, [HalfDimTag])
+
+
+
+
+# Sincronizar la geometría
+factory.synchronize()
+# Visualizar la geometría hasta este punto
+launchGUI()
+exit()
+
+
+
+
 print(f"ExtrudeOut:{ExtrudeOut}")
 
-factory.synchronize()
 
+
+
+
+factory.synchronize()
 # defineMeshSizes(2)
 gmsh.model.mesh.generate(3)
 gmsh.write("FinRay.vtk")
