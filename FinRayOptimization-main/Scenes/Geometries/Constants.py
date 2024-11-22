@@ -19,5 +19,5 @@ NRowsTactile = 10
 NColsTactile = 4
 
 sangria_grilla = 1  # Margen desde los bordes en el eje Z (mm)
-cantidad_grilla_vertical = 8  # Número deseado de líneas verticales
+cantidad_grilla_vertical = 10  # Número deseado de líneas verticales
 radio_cilindro_grilla = 1  # Radio de los cilindros (mm)

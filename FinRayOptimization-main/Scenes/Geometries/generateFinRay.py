@@ -33,9 +33,7 @@ P3= factory.addPoint(0, Constants.GripperHeight+Constants.GripperHeightGift,0)
 P4 = factory.addPoint(0, InnerGripperHeight, 0)
 PointTags = [P0,P1,P2,P3,P4]
 
-LineTags = addLines(PointTags)
-WireTag = factory.addWire(LineTags)
-SurfaceDimTag = (2,factory.addPlaneSurface([WireTag]))
+
 
 ############################### PAREDES ############################## 
 
@@ -76,37 +74,37 @@ factory.synchronize()
 
 
 
-# BarPositions = np.linspace(0, InnerGripperHeight, Constants.NBars+2)
-# for BarPosition in BarPositions[1:-1]:
-#     print(f"BarPosition:{BarPosition}")
-#     StepWidth = 0.1
+BarPositions = np.linspace(0, InnerGripperHeight, Constants.NBars+2)
+for BarPosition in BarPositions[1:-1]:
+    print(f"BarPosition:{BarPosition}")
+    StepWidth = 0.1  
+    BarTotalLength = np.tan(Phi)*BarPosition
     
-#     BarTotalLength = np.tan(Phi)*BarPosition
-    
-#     BarTopLength = np.tan(Phi)*(BarPosition-Constants.BarHeightThin/2)
-#     BarBottomLength = np.tan(Phi)*(BarPosition+Constants.BarHeightThin/2)
-    
-#     if BarTotalLength < Constants.BarThinLength:
-#         P0Bar = factory.addPoint(BarTopLength,InnerGripperHeight-(BarPosition-Constants.BarHeightThin/2),0)
-#         P1Bar = factory.addPoint(0,InnerGripperHeight-(BarPosition-Constants.BarHeightThin/2),0)
-#         P2Bar = factory.addPoint(0,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)
-#         P3Bar = factory.addPoint(BarBottomLength,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)
+    BarTopLength = np.tan(Phi)*(BarPosition-Constants.BarHeightThin/2)
+    BarBottomLength = np.tan(Phi)*(BarPosition+Constants.BarHeightThin/2)  
+    if BarTotalLength < Constants.BarThinLength:
+        P0Bar = factory.addPoint(BarTopLength,InnerGripperHeight-(BarPosition-Constants.BarHeightThin/2),0)
+        P1Bar = factory.addPoint(0,InnerGripperHeight-(BarPosition-Constants.BarHeightThin/2),0)
+        P2Bar = factory.addPoint(0,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)
+        P3Bar = factory.addPoint(BarBottomLength,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)
         
-#         PointTags += [P0Bar, P1Bar, P2Bar,P3Bar]
+        PointTags += [P0Bar, P1Bar, P2Bar,P3Bar]
     
-#     if BarTotalLength > Constants.BarThinLength:
-#         P0Bar = factory.addPoint(BarTopLength,InnerGripperHeight-(BarPosition-Constants.BarHeightThin/2),0)
-#         P1Bar = factory.addPoint(BarTopLength-Constants.BarThinLength,InnerGripperHeight-(BarPosition-Constants.BarHeightThin/2),0)
-#         P2Bar = factory.addPoint(BarTopLength-Constants.BarThinLength-StepWidth,InnerGripperHeight-(BarPosition-Constants.BarHeightThick/2),0)        
-#         P3Bar = factory.addPoint(0,InnerGripperHeight-(BarPosition-Constants.BarHeightThick/2),0)
-#         P4Bar = factory.addPoint(0,InnerGripperHeight-(BarPosition+Constants.BarHeightThick/2),0)        
-#         P5Bar = factory.addPoint(BarBottomLength-Constants.BarThinLength-StepWidth,InnerGripperHeight-(BarPosition+Constants.BarHeightThick/2),0)        
-#         P6Bar = factory.addPoint(BarBottomLength-Constants.BarThinLength,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)  
-#         P7Bar = factory.addPoint(BarBottomLength,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)
-        
-#         PointTags += [P0Bar, P1Bar, P2Bar, P3Bar, P4Bar,P5Bar,P6Bar,P7Bar]
+    if BarTotalLength > Constants.BarThinLength:
+        P0Bar = factory.addPoint(BarTopLength,InnerGripperHeight-(BarPosition-Constants.BarHeightThin/2),0)
+        P1Bar = factory.addPoint(BarTopLength-Constants.BarThinLength,InnerGripperHeight-(BarPosition-Constants.BarHeightThin/2),0)
+        P2Bar = factory.addPoint(BarTopLength-Constants.BarThinLength-StepWidth,InnerGripperHeight-(BarPosition-Constants.BarHeightThick/2),0)        
+        P3Bar = factory.addPoint(0,InnerGripperHeight-(BarPosition-Constants.BarHeightThick/2),0)
+        P4Bar = factory.addPoint(0,InnerGripperHeight-(BarPosition+Constants.BarHeightThick/2),0)        
+        P5Bar = factory.addPoint(BarBottomLength-Constants.BarThinLength-StepWidth,InnerGripperHeight-(BarPosition+Constants.BarHeightThick/2),0)        
+        P6Bar = factory.addPoint(BarBottomLength-Constants.BarThinLength,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)  
+        P7Bar = factory.addPoint(BarBottomLength,InnerGripperHeight-(BarPosition+Constants.BarHeightThin/2),0)      
+        PointTags += [P0Bar, P1Bar, P2Bar, P3Bar, P4Bar,P5Bar,P6Bar,P7Bar]
 
 
+LineTags = addLines(PointTags)
+WireTag = factory.addWire(LineTags)
+SurfaceDimTag = (2,factory.addPlaneSurface([WireTag]))
 
 ExtrudeOut = factory.extrude([SurfaceDimTag], 0, 0, Constants.Depth)
 HalfDimTag = ExtrudeOut[1]
