@@ -33,9 +33,13 @@ P3= factory.addPoint(0, Constants.GripperHeight+Constants.GripperHeightGift,0)
 P4 = factory.addPoint(0, InnerGripperHeight, 0)
 PointTags = [P0,P1,P2,P3,P4]
 
-
-
 ############################### PAREDES ############################## 
+
+
+############################### Soporte ############################## 
+
+
+############################### Soporte ##############################
 
 ############################### GRILLA ############################## 
 # Cálculo de la longitud disponible en el eje Z
@@ -87,6 +91,78 @@ for i in range(Constants.cantidad_grilla_vertical):
 # Sincronizar la geometría
 factory.synchronize()
 ############################### GRILLA ############################## 
+
+############################### GRILLA HORIZONTAL ##############################
+
+# Puntos de la pared inclinada en el lado izquierdo (coordenadas negativas)
+x1 = -Constants.GripperWidth
+y1 = 0
+z1 = 0
+
+x2 = -Constants.WallThickness
+y2 = Constants.GripperHeight + Constants.GripperHeightGift
+z2 = 0
+
+# Vector dirección de la línea
+dx_line = x2 - x1
+dy_line = y2 - y1
+
+# Número de cilindros horizontales
+cantidad_cilindros_horizontal = Constants.cantidad_grilla_horizontal
+
+# Valores de t para distribuir los cilindros a lo largo de la línea
+t_values = np.linspace(0, 1, cantidad_cilindros_horizontal)
+
+# Definir el desplazamiento en X
+offset_x = -1  # Ajusta este valor según sea necesario
+
+for t in t_values:
+    # Posición del cilindro a lo largo de la línea
+    x = x1 + t * dx_line + offset_x
+    y = y1 + t * dy_line
+    z = 0
+
+    # Vector perpendicular a la línea en 2D
+    dx_perp = -dy_line
+    dy_perp = dx_line
+
+    # Normalizar el vector perpendicular
+    length_perp = np.sqrt(dx_perp**2 + dy_perp**2)
+    dx_perp_norm = dx_perp / length_perp
+    dy_perp_norm = dy_perp / length_perp
+
+    # Cálculo del desplazamiento
+    shift_amount = (Constants.WallThickness / 2) - (Constants.radio_cilindro_grilla / 2)
+
+    # Ajustar la posición del cilindro
+    x -= dx_perp_norm * shift_amount
+    y -= dy_perp_norm * shift_amount
+
+    # Definir las dimensiones del cilindro
+    x0 = x
+    y0 = y
+    z0 = 0  # Iniciamos desde el margen en Z
+
+    dx_cilindro = 0
+    dy_cilindro = 0
+    dz_cilindro = Constants.Depth - 2 * 0
+
+    # Crear el cilindro
+    cilindro = factory.addCylinder(
+        x0, y0, z0,
+        dx_cilindro, dy_cilindro, dz_cilindro,
+        Constants.radio_cilindro_grilla
+    )
+
+    # Agregar el cilindro a la lista
+    cilindros_grilla.append((3, cilindro))
+
+# Sincronizar la geometría
+factory.synchronize()
+
+############################### GRILLA HORIZONTAL ##############################
+
+
 
 
 ############################### BARRAS INTERNAS ############################## 

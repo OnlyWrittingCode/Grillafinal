@@ -18,6 +18,8 @@ NBars = 9
 NRowsTactile = 10
 NColsTactile = 4
 
-sangria_grilla = 1  # Margen desde los bordes en el eje Z (mm)
-cantidad_grilla_vertical = 10  # Número deseado de líneas verticales
-radio_cilindro_grilla = 1  # Radio de los cilindros (mm)
+sangria_grilla = 5  # Margen desde los bordes en el eje Z (mm)
+sangria_grilla_horizontal = 0 
+cantidad_grilla_vertical = 5  # Número deseado de líneas verticales
+cantidad_grilla_horizontal = 6  # Número deseado de líneas horizontales
+radio_cilindro_grilla = 0.5  # Radio de los cilindros (mm)
