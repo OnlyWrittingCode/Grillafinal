@@ -37,7 +37,15 @@ PointTags = [P0,P1,P2,P3,P4]
 
 
 ############################### Soporte ############################## 
+soporte1 = factory.addPoint(Constants.GripperWidth, -10, 0)
+soporte2 = factory.addPoint(Constants.GripperWidth-6, -10, 0)
+soporte3 = factory.addPoint(Constants.GripperWidth-6, -7, 0)
+soporte4 = factory.addPoint(Constants.GripperWidth-3, -7, 0)
+soporte5 = factory.addPoint(Constants.GripperWidth-3, -3, 0)
+soporte6 = factory.addPoint(0, -3, 0)
+soporte7 = factory.addPoint(0, 0, 0)
 
+point_tag_soporte = [P1,soporte1,soporte2,soporte3,soporte4,soporte5,soporte6,soporte7,P0]
 
 ############################### Soporte ##############################
 
@@ -196,18 +204,34 @@ for BarPosition in BarPositions[1:-1]:
 
 ############################### LINEAS 2D Y SUP?############################## 
 LineTags = addLines(PointTags)
+LineTags_soporte = addLines(point_tag_soporte)
+
 WireTag = factory.addWire(LineTags)
+WireTag_soporte = factory.addWire(LineTags_soporte)
+
 SurfaceDimTag = (2,factory.addPlaneSurface([WireTag]))
+SurfaceDimTag_soporte = (2,factory.addPlaneSurface([WireTag_soporte]))
 ############################### LINEAS 2D Y SUP? ############################## 
+
+
+
 
 ############################### LE DA SUPERFICIE ############################## 
 ExtrudeOut = factory.extrude([SurfaceDimTag], 0, 0, Constants.Depth)
+ExtrudeOut_soporte = factory.extrude([SurfaceDimTag_soporte], 0, 0, Constants.Depth)
+
 HalfDimTag = ExtrudeOut[1]
+HalfDimTag_soporte = ExtrudeOut_soporte[1]
 ############################### LE DA SUPERFICIE ############################## 
+
 
 ############################### DUPLICA LA FIGURA ############################## 
 CopyDimTags = factory.copy([HalfDimTag])
+CopyDimTags_soporte = factory.copy([HalfDimTag_soporte])
+
+
 factory.symmetrize(CopyDimTags, 1, 0, 0, 0)
+factory.symmetrize(CopyDimTags_soporte, 1, 0, 0, 0)
 ############################### DUPLICA LA FIGURA ############################## 
 
 factory.fuse(CopyDimTags, [HalfDimTag])
