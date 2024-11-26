@@ -23,3 +23,5 @@ sangria_grilla_horizontal = 0
 cantidad_grilla_vertical = 5  # Número deseado de líneas verticales
 cantidad_grilla_horizontal = 6  # Número deseado de líneas horizontales
 radio_cilindro_grilla = 0.5  # Radio de los cilindros (mm)
+
+borde = 1  # Separación en mm

@@ -33,6 +33,7 @@ P3= factory.addPoint(0, Constants.GripperHeight+Constants.GripperHeightGift,0)
 P4 = factory.addPoint(0, InnerGripperHeight, 0)
 PointTags = [P0,P1,P2,P3,P4]
 
+PointTags_exterior = PointTags.copy()
 ############################### PAREDES ############################## 
 
 ############################### Soporte ############################## 
@@ -199,20 +200,25 @@ for BarPosition in BarPositions[1:-1]:
 ############################### LINEAS 2D Y SUP?############################## 
 LineTags = addLines(PointTags)
 LineTags_soporte = addLines(point_tag_soporte)
+Line_tags_exterior = addLines(PointTags_exterior)
 
 WireTag = factory.addWire(LineTags)
 WireTag_soporte = factory.addWire(LineTags_soporte)
+WireTag_exterior = factory.addWire(Line_tags_exterior)
 
 SurfaceDimTag = (2,factory.addPlaneSurface([WireTag]))
 SurfaceDimTag_soporte = (2,factory.addPlaneSurface([WireTag_soporte]))
+SurfaceDimTag_exterior = (2,factory.addPlaneSurface([WireTag_exterior]))
 ############################### LINEAS 2D Y SUP? ############################## 
 
 ############################### LE DA SUPERFICIE ############################## 
 ExtrudeOut = factory.extrude([SurfaceDimTag], 0, 0, Constants.Depth)
-ExtrudeOut_soporte = factory.extrude([SurfaceDimTag_soporte], 0, 0, Constants.Depth)
+ExtrudeOut_soporte = factory.extrude([SurfaceDimTag_soporte], 0, 0, Constants.Depth+Constants.borde)
+ExtrudeOut_exterior = factory.extrude([SurfaceDimTag_exterior], 0, 0, Constants.Depth+Constants.borde)
 
 HalfDimTag = ExtrudeOut[1]
 HalfDimTag_soporte = ExtrudeOut_soporte[1]
+HalfDimTag_exterior = ExtrudeOut_exterior[1]
 ############################### LE DA SUPERFICIE ############################## 
 
 ############################### DUPLICA LA FIGURA ##############################
@@ -226,6 +232,12 @@ CopyDimTags_soporte = factory.copy([HalfDimTag_soporte])
 factory.synchronize()  # Sincronizar antes de simetrizar
 factory.symmetrize(CopyDimTags_soporte, 1, 0, 0, 0)
 
+# Copiar y simetrizar el exterior
+CopyDimTags_exterior= factory.copy([HalfDimTag_exterior])
+factory.synchronize()  # Sincronizar antes de simetrizar
+factory.symmetrize(CopyDimTags_exterior, 1, 0, 0, 0)
+
+
 # Realizar la fusión de la garra
 fuse_result_garra = factory.fuse(CopyDimTags, [HalfDimTag])
 garra_final = fuse_result_garra[0]  # Entidades agregadas de la garra
@@ -234,12 +246,20 @@ garra_final = fuse_result_garra[0]  # Entidades agregadas de la garra
 fuse_result_soporte = factory.fuse(CopyDimTags_soporte, [HalfDimTag_soporte])
 soporte_final = fuse_result_soporte[0]  # Entidades agregadas del soporte
 
+fuse_result_exterior = factory.fuse(CopyDimTags_exterior, [HalfDimTag_exterior])
+exterior_final =  fuse_result_exterior[0]
+
 # Fusionar garra y soporte en una sola entidad final
 fuse_result_total = factory.fuse(garra_final, soporte_final)
 garra_soporte_final = fuse_result_total[0]  # Entidades agregadas de la fusión total
 
+fuse_total = factory.fuse(garra_soporte_final,exterior_final)
+total_final = fuse_total[0]
+
+
+
 # Imprimir para verificar
-print("Garra Final después de la fusión:", garra_soporte_final)
+print("Garra Final después de la fusión:", total_final)
 
 # Sincronizar después de la fusión total
 factory.synchronize()
@@ -247,7 +267,7 @@ factory.synchronize()
 
 ############################### OPERACIÓN DE CORTE ##############################
 # Definir las entidades a cortar y las herramientas de corte
-objects_to_cut = garra_soporte_final  # Lista de entidades a cortar
+objects_to_cut = total_final  # Lista de entidades a cortar
 cutting_tools = cilindros_grilla  # Lista de cilindros que harán el corte (lista de tuplas (dim, tag))
 
 # Verificar los datos antes de realizar la operación de corte
@@ -280,3 +300,4 @@ gmsh.model.mesh.refine()
 gmsh.write("FinRay.stl")
 factory.synchronize()
 launchGUI()
+exit()
