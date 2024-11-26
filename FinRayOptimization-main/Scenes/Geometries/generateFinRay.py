@@ -35,7 +35,6 @@ PointTags = [P0,P1,P2,P3,P4]
 
 ############################### PAREDES ############################## 
 
-
 ############################### Soporte ############################## 
 soporte1 = factory.addPoint(Constants.GripperWidth, -10, 0)
 soporte2 = factory.addPoint(Constants.GripperWidth-6, -10, 0)
@@ -101,7 +100,6 @@ factory.synchronize()
 ############################### GRILLA ############################## 
 
 ############################### GRILLA HORIZONTAL ##############################
-
 # Puntos de la pared inclinada en el lado izquierdo (coordenadas negativas)
 x1 = -Constants.GripperWidth
 y1 = 0
@@ -167,11 +165,7 @@ for t in t_values:
 
 # Sincronizar la geometría
 factory.synchronize()
-
 ############################### GRILLA HORIZONTAL ##############################
-
-
-
 
 ############################### BARRAS INTERNAS ############################## 
 BarPositions = np.linspace(0, InnerGripperHeight, Constants.NBars+2)
@@ -213,9 +207,6 @@ SurfaceDimTag = (2,factory.addPlaneSurface([WireTag]))
 SurfaceDimTag_soporte = (2,factory.addPlaneSurface([WireTag_soporte]))
 ############################### LINEAS 2D Y SUP? ############################## 
 
-
-
-
 ############################### LE DA SUPERFICIE ############################## 
 ExtrudeOut = factory.extrude([SurfaceDimTag], 0, 0, Constants.Depth)
 ExtrudeOut_soporte = factory.extrude([SurfaceDimTag_soporte], 0, 0, Constants.Depth)
@@ -224,36 +215,60 @@ HalfDimTag = ExtrudeOut[1]
 HalfDimTag_soporte = ExtrudeOut_soporte[1]
 ############################### LE DA SUPERFICIE ############################## 
 
-
-############################### DUPLICA LA FIGURA ############################## 
+############################### DUPLICA LA FIGURA ##############################
+# Copiar y simetrizar la garra
 CopyDimTags = factory.copy([HalfDimTag])
-CopyDimTags_soporte = factory.copy([HalfDimTag_soporte])
-
-
+factory.synchronize()  # Sincronizar antes de simetrizar
 factory.symmetrize(CopyDimTags, 1, 0, 0, 0)
+
+# Copiar y simetrizar el soporte
+CopyDimTags_soporte = factory.copy([HalfDimTag_soporte])
+factory.synchronize()  # Sincronizar antes de simetrizar
 factory.symmetrize(CopyDimTags_soporte, 1, 0, 0, 0)
-############################### DUPLICA LA FIGURA ############################## 
 
-factory.fuse(CopyDimTags, [HalfDimTag])
+# Realizar la fusión de la garra
+fuse_result_garra = factory.fuse(CopyDimTags, [HalfDimTag])
+garra_final = fuse_result_garra[0]  # Entidades agregadas de la garra
 
+# Realizar la fusión del soporte
+fuse_result_soporte = factory.fuse(CopyDimTags_soporte, [HalfDimTag_soporte])
+soporte_final = fuse_result_soporte[0]  # Entidades agregadas del soporte
 
+# Fusionar garra y soporte en una sola entidad final
+fuse_result_total = factory.fuse(garra_final, soporte_final)
+garra_soporte_final = fuse_result_total[0]  # Entidades agregadas de la fusión total
 
+# Imprimir para verificar
+print("Garra Final después de la fusión:", garra_soporte_final)
 
-# Sincronizar la geometría
+# Sincronizar después de la fusión total
 factory.synchronize()
-# Visualizar la geometría hasta este punto
-launchGUI()
-exit()
+############################### DUPLICA LA FIGURA ##############################
 
+############################### OPERACIÓN DE CORTE ##############################
+# Definir las entidades a cortar y las herramientas de corte
+objects_to_cut = garra_soporte_final  # Lista de entidades a cortar
+cutting_tools = cilindros_grilla  # Lista de cilindros que harán el corte (lista de tuplas (dim, tag))
 
+# Verificar los datos antes de realizar la operación de corte
+print("Entidades a cortar (objects_to_cut):", objects_to_cut)
+print("Herramientas de corte (cutting_tools):", cutting_tools)
+
+# Realizar la operación de corte
+cut_result = factory.cut(objects_to_cut, cutting_tools)
+added_cut = cut_result[0]  # Entidades agregadas (resultado del corte)
+removed_cut = cut_result[1]  # Entidades removidas durante el corte
+
+# Verificar y asignar
+if added_cut:
+    HalfDimTag = added_cut[0]  # Asignar el volumen resultante del corte
+    print("Garra cortada:", HalfDimTag)
+else:
+    print("Error: No se crearon entidades durante el corte.")
+############################### OPERACIÓN DE CORTE ##############################
 
 
 print(f"ExtrudeOut:{ExtrudeOut}")
-
-
-
-
-
 factory.synchronize()
 # defineMeshSizes(2)
 gmsh.model.mesh.generate(3)
@@ -263,7 +278,5 @@ gmsh.model.mesh.generate(2)
 gmsh.model.mesh.refine()
 gmsh.model.mesh.refine()
 gmsh.write("FinRay.stl")
-
 factory.synchronize()
-
 launchGUI()
