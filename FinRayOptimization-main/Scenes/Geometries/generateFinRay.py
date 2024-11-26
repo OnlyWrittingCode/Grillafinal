@@ -288,6 +288,14 @@ else:
 ############################### OPERACIÓN DE CORTE ##############################
 
 
+# Copiar y simetrizar el exterior
+CopyDimTags_finaltotal= factory.copy([HalfDimTag])
+factory.synchronize()  # Sincronizar antes de simetrizar
+factory.symmetrize(CopyDimTags_finaltotal, 0, 0, -1, 26)
+
+
+
+
 print(f"ExtrudeOut:{ExtrudeOut}")
 factory.synchronize()
 # defineMeshSizes(2)
