@@ -1,7 +1,7 @@
 import numpy as np
 GripperHeight = 100 #altura garra
 
-Depth = 25 #profundidad
+Depth = 10 #profundidad
 GripperWidth = 30 #ancho garra
 Theta = np.arctan2(GripperHeight, GripperWidth)
 Phi = np.arctan2(GripperWidth, GripperHeight)
@@ -18,10 +18,11 @@ NBars = 9
 NRowsTactile = 10
 NColsTactile = 4
 
-sangria_grilla = 5  # Margen desde los bordes en el eje Z (mm)
-sangria_grilla_horizontal = 0 
-cantidad_grilla_vertical = 5  # Número deseado de líneas verticales
-cantidad_grilla_horizontal = 6  # Número deseado de líneas horizontales
+sangria_grilla = 0  # Margen desde los bordes en el eje Z (mm)
+cantidad_grilla_vertical = 6  # Número deseado de líneas verticales
+
+sangria_grilla_horizontal = 5 
+cantidad_grilla_horizontal = 9  # Número deseado de líneas horizontales
 radio_cilindro_grilla = 0.5  # Radio de los cilindros (mm)
 
 borde = 1  # Separación en mm

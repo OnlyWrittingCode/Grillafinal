@@ -117,8 +117,23 @@ dy_line = y2 - y1
 # Número de cilindros horizontales
 cantidad_cilindros_horizontal = Constants.cantidad_grilla_horizontal
 
-# Valores de t para distribuir los cilindros a lo largo de la línea
-t_values = np.linspace(0, 1, cantidad_cilindros_horizontal)
+# Calcular la longitud total en Y
+longitud_total_y = y2 - y1
+
+# Calcular las posiciones Y inicial y final con sangría
+y_inicio_con_sangria = y1 + Constants.sangria_grilla_horizontal
+y_fin_con_sangria = y2 - Constants.sangria_grilla_horizontal
+
+# Calcular los valores de t correspondientes a las posiciones Y con sangría
+t_inicio = (y_inicio_con_sangria - y1) / (y2 - y1)
+t_fin = (y_fin_con_sangria - y1) / (y2 - y1)
+
+# Asegurar que t_inicio y t_fin están entre 0 y 1
+t_inicio = max(0, min(1, t_inicio))
+t_fin = max(0, min(1, t_fin))
+
+# Generar los valores de t ajustados
+t_values = np.linspace(t_inicio, t_fin, cantidad_cilindros_horizontal)
 
 # Definir el desplazamiento en X
 offset_x = -1  # Ajusta este valor según sea necesario
@@ -152,7 +167,7 @@ for t in t_values:
 
     dx_cilindro = 0
     dy_cilindro = 0
-    dz_cilindro = Constants.Depth - 2 * 0
+    dz_cilindro = Constants.Depth
 
     # Crear el cilindro
     cilindro = factory.addCylinder(
@@ -167,6 +182,7 @@ for t in t_values:
 # Sincronizar la geometría
 factory.synchronize()
 ############################### GRILLA HORIZONTAL ##############################
+
 
 ############################### BARRAS INTERNAS ############################## 
 BarPositions = np.linspace(0, InnerGripperHeight, Constants.NBars+2)
@@ -291,7 +307,7 @@ else:
 # Copiar y simetrizar el exterior
 CopyDimTags_finaltotal= factory.copy([HalfDimTag])
 factory.synchronize()  # Sincronizar antes de simetrizar
-factory.symmetrize(CopyDimTags_finaltotal, 0, 0, -1, 26)
+factory.symmetrize(CopyDimTags_finaltotal, 0, 0, -1, Constants.Depth+Constants.borde)
 
 
 
