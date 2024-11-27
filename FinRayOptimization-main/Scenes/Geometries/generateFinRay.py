@@ -167,7 +167,7 @@ for t in t_values:
 
     dx_cilindro = 0
     dy_cilindro = 0
-    dz_cilindro = Constants.Depth
+    dz_cilindro = Constants.Depth + Constants.borde
 
     # Crear el cilindro
     cilindro = factory.addCylinder(
@@ -308,6 +308,14 @@ else:
 CopyDimTags_finaltotal= factory.copy([HalfDimTag])
 factory.synchronize()  # Sincronizar antes de simetrizar
 factory.symmetrize(CopyDimTags_finaltotal, 0, 0, -1, Constants.Depth+Constants.borde)
+
+
+
+
+
+box_tag = gmsh.model.occ.addBox(-50, 0, 52, 50, 0, 10)
+
+
 
 
 
