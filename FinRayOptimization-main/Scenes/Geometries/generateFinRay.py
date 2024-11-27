@@ -310,13 +310,24 @@ factory.synchronize()  # Sincronizar antes de simetrizar
 factory.symmetrize(CopyDimTags_finaltotal, 0, 0, -1, Constants.Depth+Constants.borde)
 
 
+#BASE DE GARRA#
 
+base0 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, 0, 0)
+base1 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
+base2 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
+base3 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, 0, 0)
 
+point_tag_base = [base0,base1,base2,base3]
 
-box_tag = gmsh.model.occ.addBox(-50, 0, 52, 50, 0, 10)
+Line_tags_base = addLines(point_tag_base)
 
+WireTag_base = factory.addWire(Line_tags_base)
 
+SurfaceDimTag_base = (2,factory.addPlaneSurface([WireTag_base]))
 
+ExtrudeOut_base = factory.extrude([SurfaceDimTag_base], 0, 0, (Constants.Depth+Constants.borde)*2)
+
+dimtag_base = ExtrudeOut_base[1]
 
 
 
