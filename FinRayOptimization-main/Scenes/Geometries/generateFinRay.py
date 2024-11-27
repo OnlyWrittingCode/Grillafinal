@@ -309,25 +309,50 @@ CopyDimTags_finaltotal= factory.copy([HalfDimTag])
 factory.synchronize()  # Sincronizar antes de simetrizar
 factory.symmetrize(CopyDimTags_finaltotal, 0, 0, -1, Constants.Depth+Constants.borde)
 
+# Fusionar las dos mitades de la garra para obtener la garra completa
+fuse_full_gripper = factory.fuse([HalfDimTag], CopyDimTags_finaltotal)
+full_gripper = fuse_full_gripper[0]  # Entidades agregadas (resultado de la fusión)
 
-#BASE DE GARRA#
+# Sincronizar después de la fusión
+factory.synchronize()
+
+# BASE DE GARRA
 
 base0 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, 0, 0)
 base1 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
 base2 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
 base3 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, 0, 0)
 
-point_tag_base = [base0,base1,base2,base3]
+point_tag_base = [base0, base1, base2, base3]
 
 Line_tags_base = addLines(point_tag_base)
 
 WireTag_base = factory.addWire(Line_tags_base)
 
-SurfaceDimTag_base = (2,factory.addPlaneSurface([WireTag_base]))
+SurfaceDimTag_base = (2, factory.addPlaneSurface([WireTag_base]))
 
-ExtrudeOut_base = factory.extrude([SurfaceDimTag_base], 0, 0, (Constants.Depth+Constants.borde)*2)
+ExtrudeOut_base = factory.extrude([SurfaceDimTag_base], 0, 0, (Constants.Depth + Constants.borde) * 2)
 
 dimtag_base = ExtrudeOut_base[1]
+
+factory.synchronize()
+
+############################### CORTE DE LA BASE ##############################
+
+# Realizar el corte: base - garra completa
+cut_result_base = factory.cut([dimtag_base], full_gripper)
+
+# Obtenemos el volumen resultante
+if cut_result_base[0]:
+    base_con_hueco = cut_result_base[0]
+    print("Base después del corte:", base_con_hueco)
+else:
+    print("Error: No se creó ninguna entidad durante el corte de la base.")
+
+# Sincronizar después del corte
+factory.synchronize()
+
+############################### CORTE DE LA BASE ##############################
 
 
 
