@@ -316,43 +316,79 @@ full_gripper = fuse_full_gripper[0]  # Entidades agregadas (resultado de la fusi
 # Sincronizar después de la fusión
 factory.synchronize()
 
-# # BASE DE GARRA
+############################### BASE DE GARRA ##############################
 
-# base0 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, 0, 0)
-# base1 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
-# base2 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
-# base3 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, 0, 0)
+# Definir los parámetros de las alas
+wing_extension = 10  # Extensión lateral de las alas en milímetros (ajusta según necesites)
+wing_height = 1      # Altura de las alas en milímetros (desde la parte inferior de la base)
 
-# point_tag_base = [base0, base1, base2, base3]
+# Crear los puntos de la base original
+base0 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, 0, 0)
+base1 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
+base2 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
+base3 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, 0, 0)
 
-# Line_tags_base = addLines(point_tag_base)
+point_tag_base = [base0, base1, base2, base3]
 
-# WireTag_base = factory.addWire(Line_tags_base)
+# Crear las líneas y la superficie de la base
+Line_tags_base = addLines(point_tag_base)
+WireTag_base = factory.addWire(Line_tags_base)
+SurfaceDimTag_base = (2, factory.addPlaneSurface([WireTag_base]))
 
-# SurfaceDimTag_base = (2, factory.addPlaneSurface([WireTag_base]))
+# Extruir la base
+ExtrudeOut_base = factory.extrude([SurfaceDimTag_base], 0, 0, (Constants.Depth + Constants.borde) * 2)
+dimtag_base = ExtrudeOut_base[1]
 
-# ExtrudeOut_base = factory.extrude([SurfaceDimTag_base], 0, 0, (Constants.Depth + Constants.borde) * 2)
+# Sincronizar después de extruir la base
+factory.synchronize()
 
-# dimtag_base = ExtrudeOut_base[1]
+# Crear las alas como cajas y fusionarlas con la base
 
-# factory.synchronize()
+# Coordenadas comunes
+y0_wing = -10 - Constants.abajo_base_extra
+z0_wing = 0
+dx_wing = wing_extension
+dy_wing = wing_height
+dz_wing = (Constants.Depth + Constants.borde) * 2
 
-# ############################### CORTE DE LA BASE ##############################
+# Ala derecha
+x0_right_wing = Constants.GripperWidth + Constants.base_extra
+right_wing = factory.addBox(x0_right_wing, y0_wing, z0_wing, dx_wing, dy_wing, dz_wing)
 
-# # Realizar el corte: base - garra completa
-# cut_result_base = factory.cut([dimtag_base], full_gripper)
+# Ala izquierda
+x0_left_wing = -Constants.GripperWidth - Constants.base_extra - wing_extension
+left_wing = factory.addBox(x0_left_wing, y0_wing, z0_wing, dx_wing, dy_wing, dz_wing)
 
-# # Obtenemos el volumen resultante
-# if cut_result_base[0]:
-#     base_con_hueco = cut_result_base[0]
-#     print("Base después del corte:", base_con_hueco)
-# else:
-#     print("Error: No se creó ninguna entidad durante el corte de la base.")
+# Sincronizar después de crear las alas
+factory.synchronize()
 
-# # Sincronizar después del corte
-# factory.synchronize()
+# Fusionar la base con el ala derecha
+fuse_result_base_right_wing = factory.fuse([dimtag_base], [(3, right_wing)])
+base_with_right_wing = fuse_result_base_right_wing[0]
+factory.synchronize()
 
-# ############################### CORTE DE LA BASE ##############################
+# Fusionar el resultado anterior con el ala izquierda
+fuse_result_base_wings = factory.fuse(base_with_right_wing, [(3, left_wing)])
+base_with_wings = fuse_result_base_wings[0]
+factory.synchronize()
+
+############################### CORTE DE LA BASE ##############################
+
+# Realizar el corte: base con alas - garra completa
+cut_result_base = factory.cut(base_with_wings, full_gripper)
+
+# Obtener el volumen resultante después del corte
+if cut_result_base[0]:
+    base_con_hueco = cut_result_base[0]
+    print("Base con alas después del corte:", base_con_hueco)
+else:
+    print("Error: No se creó ninguna entidad durante el corte de la base.")
+
+# Sincronizar después del corte
+factory.synchronize()
+
+############################### CORTE DE LA BASE ##############################
+
 
 
 
@@ -422,7 +458,7 @@ cilindro_central_tag = factory.addCylinder(
 factory.synchronize()
 
 # Visualizar la figura con el cilindro antes del corte
-#launchGUI()
+launchGUI()
 
 # Realizar el corte de la garra completa con el cilindro central
 cut_result_cilindro = factory.cut(full_gripper, [(3, cilindro_central_tag)])
@@ -453,7 +489,6 @@ gmsh.model.mesh.generate(2)
 gmsh.model.mesh.refine()
 gmsh.model.mesh.refine()
 gmsh.write("FinRay.stl")
-gmsh.write("FinRay.step")
 factory.synchronize()
 launchGUI()
 exit()
