@@ -316,43 +316,130 @@ full_gripper = fuse_full_gripper[0]  # Entidades agregadas (resultado de la fusi
 # Sincronizar después de la fusión
 factory.synchronize()
 
-# BASE DE GARRA
+# # BASE DE GARRA
 
-base0 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, 0, 0)
-base1 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
-base2 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
-base3 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, 0, 0)
+# base0 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, 0, 0)
+# base1 = factory.addPoint(Constants.GripperWidth + Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
+# base2 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, -10 - Constants.abajo_base_extra, 0)
+# base3 = factory.addPoint(-Constants.GripperWidth - Constants.base_extra, 0, 0)
 
-point_tag_base = [base0, base1, base2, base3]
+# point_tag_base = [base0, base1, base2, base3]
 
-Line_tags_base = addLines(point_tag_base)
+# Line_tags_base = addLines(point_tag_base)
 
-WireTag_base = factory.addWire(Line_tags_base)
+# WireTag_base = factory.addWire(Line_tags_base)
 
-SurfaceDimTag_base = (2, factory.addPlaneSurface([WireTag_base]))
+# SurfaceDimTag_base = (2, factory.addPlaneSurface([WireTag_base]))
 
-ExtrudeOut_base = factory.extrude([SurfaceDimTag_base], 0, 0, (Constants.Depth + Constants.borde) * 2)
+# ExtrudeOut_base = factory.extrude([SurfaceDimTag_base], 0, 0, (Constants.Depth + Constants.borde) * 2)
 
-dimtag_base = ExtrudeOut_base[1]
+# dimtag_base = ExtrudeOut_base[1]
 
+# factory.synchronize()
+
+# ############################### CORTE DE LA BASE ##############################
+
+# # Realizar el corte: base - garra completa
+# cut_result_base = factory.cut([dimtag_base], full_gripper)
+
+# # Obtenemos el volumen resultante
+# if cut_result_base[0]:
+#     base_con_hueco = cut_result_base[0]
+#     print("Base después del corte:", base_con_hueco)
+# else:
+#     print("Error: No se creó ninguna entidad durante el corte de la base.")
+
+# # Sincronizar después del corte
+# factory.synchronize()
+
+# ############################### CORTE DE LA BASE ##############################
+
+
+
+############################### CILINDRO EN EL CENTRO ##############################
+
+from math import sqrt
+
+# Punto de inicio original del cilindro (en la pared izquierda)
+x0_original = -Constants.GripperWidth + Constants.WallThickness  # Justo dentro de la pared izquierda
+y0_original = Constants.GripperHeight / 2  # Altura central en Y
+z0_original = Constants.Depth + Constants.borde  # Centro en Z después de la simetría
+
+# Punto final original del cilindro (en la pared derecha)
+x1_original = Constants.GripperWidth - Constants.WallThickness  # Justo dentro de la pared derecha
+y1_original = y0_original - 50  # Inclinación hacia abajo (ajusta según necesites)
+z1_original = z0_original  # Misma posición en Z
+
+# Calcular el punto central del cilindro
+x_centro = (x0_original + x1_original) / 2
+y_centro = (y0_original + y1_original) / 2
+z_centro = (z0_original + z1_original) / 2
+
+# Calcular el vector dirección original
+dx_original = x1_original - x0_original
+dy_original = y1_original - y0_original
+dz_original = z1_original - z0_original
+
+# Calcular la longitud original del cilindro
+longitud_original = sqrt(dx_original**2 + dy_original**2 + dz_original**2)
+
+# Vector dirección unitario
+ux = dx_original / longitud_original
+uy = dy_original / longitud_original
+uz = dz_original / longitud_original
+
+# Definir el incremento de longitud en cada extremo
+incremento = 20  # En milímetros (ajusta este valor según necesites)
+
+# Calcular la nueva longitud total del cilindro
+longitud_nueva = longitud_original + 2 * incremento
+
+# Calcular los nuevos puntos inicial y final
+x0_nuevo = x_centro - (longitud_nueva / 2) * ux
+y0_nuevo = y_centro - (longitud_nueva / 2) * uy
+z0_nuevo = z_centro - (longitud_nueva / 2) * uz
+
+x1_nuevo = x_centro + (longitud_nueva / 2) * ux
+y1_nuevo = y_centro + (longitud_nueva / 2) * uy
+z1_nuevo = z_centro + (longitud_nueva / 2) * uz
+
+# Calcular el nuevo vector dirección
+dx_nuevo = x1_nuevo - x0_nuevo
+dy_nuevo = y1_nuevo - y0_nuevo
+dz_nuevo = z1_nuevo - z0_nuevo
+
+# Definir el radio del cilindro
+radio_cilindro_central = 1  # Ajusta según el diámetro del cable
+
+# Crear el cilindro con los nuevos parámetros
+cilindro_central_tag = factory.addCylinder(
+    x0_nuevo, y0_nuevo, z0_nuevo,  # Nuevo punto de inicio
+    dx_nuevo, dy_nuevo, dz_nuevo,  # Nuevo vector dirección
+    radio_cilindro_central  # Radio del cilindro
+)
+
+# Sincronizar la geometría
 factory.synchronize()
 
-############################### CORTE DE LA BASE ##############################
+# Visualizar la figura con el cilindro antes del corte
+#launchGUI()
 
-# Realizar el corte: base - garra completa
-cut_result_base = factory.cut([dimtag_base], full_gripper)
+# Realizar el corte de la garra completa con el cilindro central
+cut_result_cilindro = factory.cut(full_gripper, [(3, cilindro_central_tag)])
 
-# Obtenemos el volumen resultante
-if cut_result_base[0]:
-    base_con_hueco = cut_result_base[0]
-    print("Base después del corte:", base_con_hueco)
+# Obtener el volumen resultante después del corte
+if cut_result_cilindro[0]:
+    full_gripper_con_hueco = cut_result_cilindro[0]
+    print("Garra con hueco para el cable:", full_gripper_con_hueco)
 else:
-    print("Error: No se creó ninguna entidad durante el corte de la base.")
+    print("Error: No se creó ninguna entidad durante el corte con el cilindro central.")
 
 # Sincronizar después del corte
 factory.synchronize()
 
-############################### CORTE DE LA BASE ##############################
+############################### CILINDRO EN EL CENTRO ##############################
+
+
 
 
 
@@ -366,6 +453,7 @@ gmsh.model.mesh.generate(2)
 gmsh.model.mesh.refine()
 gmsh.model.mesh.refine()
 gmsh.write("FinRay.stl")
+gmsh.write("FinRay.step")
 factory.synchronize()
 launchGUI()
 exit()
